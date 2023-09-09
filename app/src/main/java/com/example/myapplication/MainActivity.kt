@@ -54,6 +54,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -90,71 +91,94 @@ fun TasksScreen(tasks: Map<String, String>) {
         sheetPeekHeight = Dp(0f),
         scaffoldState = bottomSheetScafflodState,
         sheetContent = {
-            OutlinedTextField(
-                modifier = Modifier
-                    .padding(horizontal = Dp(20f))
-                    .fillMaxWidth(),
-                value = title,
-                onValueChange = {
-                    title = it
-                },
-                label = { Text(text = "Title") },
-            )
-            OutlinedTextField(
-                modifier = Modifier
-                    .padding(horizontal = Dp(20f))
-                    .fillMaxWidth(),
-                value = body,
-                onValueChange = {
-                    body = it
-                },
-                label = { Text(text = "Body") },
-            )
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()){
-                Button(
-                    onClick = {
-                        saveData(
-                            title.text,
-                            body.text
-                        )
-                        title = TextFieldValue("")
-                        body = TextFieldValue("")
-                        scope.launch { bottomSheetState.hide() }
-                    }, modifier = Modifier
-
-                        .padding(all = Dp(10f))
-                ) {
-                    Text(text = "Save")
-                }
-                Button(
-                    onClick = {
-                        scope.launch { bottomSheetState.hide() }
-                    }, modifier = Modifier
-                        .padding(all = Dp(10f))
-                ) {
-                    Text(text = "Close")
-                }
-            }
+            BottomSheetContent(title, body, scope, bottomSheetState)
         }) {
         MyApplicationTheme {
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                ListGenerator(list = tasks)
-                Button(onClick = {
-                    scope.launch {
-                        if (bottomSheetState.currentValue == SheetValue.Hidden)
-                            bottomSheetState.expand()
-                        else
-                            bottomSheetState.hide()
-                    }
-                }, Modifier.padding(end = Dp(10f), bottom = Dp(10f))) {
-                    Text(text = "Add New Task")
-                }
-            }
+            TasksList(tasks, scope, bottomSheetState)
 
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TasksList(
+    tasks: Map<String, String>,
+    scope: CoroutineScope,
+    bottomSheetState: SheetState
+) {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.End,
+        modifier = Modifier.fillMaxHeight()
+    ) {
+        ListGenerator(list = tasks)
+        Button(onClick = {
+            scope.launch {
+                if (bottomSheetState.currentValue == SheetValue.Hidden)
+                    bottomSheetState.expand()
+                else
+                    bottomSheetState.hide()
+            }
+        }, Modifier.padding(end = Dp(10f), bottom = Dp(10f))) {
+            Text(text = "Add New Task")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BottomSheetContent(
+    title: TextFieldValue,
+    body: TextFieldValue,
+    scope: CoroutineScope,
+    bottomSheetState: SheetState
+) {
+    var title1 = title
+    var body1 = body
+    OutlinedTextField(
+        modifier = Modifier
+            .padding(horizontal = Dp(20f))
+            .fillMaxWidth(),
+        value = title1,
+        onValueChange = {
+            title1 = it
+        },
+        label = { Text(text = "Title") },
+    )
+    OutlinedTextField(
+        modifier = Modifier
+            .padding(horizontal = Dp(20f))
+            .fillMaxWidth(),
+        value = body1,
+        onValueChange = {
+            body1 = it
+        },
+        label = { Text(text = "Body") },
+    )
+    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = {
+                saveData(
+                    title1.text,
+                    body1.text
+                )
+                title1 = TextFieldValue("")
+                body1 = TextFieldValue("")
+                scope.launch { bottomSheetState.hide() }
+            }, modifier = Modifier
+
+                .padding(all = Dp(10f))
+        ) {
+            Text(text = "Save")
+        }
+        Button(
+            onClick = {
+                scope.launch { bottomSheetState.hide() }
+            }, modifier = Modifier
+                .padding(all = Dp(10f))
+        ) {
+            Text(text = "Close")
         }
     }
 }
