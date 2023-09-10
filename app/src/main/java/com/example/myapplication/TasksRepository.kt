@@ -8,4 +8,8 @@ class TasksRepository(private val tasksDAO: TasksDAO) {
     suspend fun insertTask(tasksEntity: TasksEntity){
         tasksDAO.insert(tasksEntity)
     }
+
+    suspend fun deleteTask(id: Int){
+        tasksDAO.delete(id)
+    }
 }
